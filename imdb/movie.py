@@ -5,6 +5,8 @@
 Provides functions to interact with the movie/series features of the IMDb iPhone API.
 """
 
+import re
+
 from .base import Imdb
 
 

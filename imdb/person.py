@@ -5,6 +5,7 @@
 Provides functions to interact with the person feature of the IMDb iPhone API.
 """
 
+import re
 from .base import Imdb
 
 
