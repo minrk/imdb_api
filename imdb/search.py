@@ -12,8 +12,10 @@ import urllib
 
 from .base import Imdb
 
-def search(term):
+def search(term, extra=None):
     i = Imdb()
 
     arg = {"q": term}
+    if extra:
+        arg.update(extra)
     return i.make_request('/find', arg)
