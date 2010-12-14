@@ -44,7 +44,7 @@ class ImdbFeatures(Imdb):
         """
         if self.check_box_office_region(region) is False:
             region = 'US'
-        arg {
+        arg = {
             "boxoffice_region": region
         }
         return self.make_request('/boxoffice', arg)
