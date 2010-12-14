@@ -10,12 +10,31 @@ from __future__ import absolute_import
 
 import urllib
 
-from .base import Imdb
+from .base import instance
 
 def search(term, extra=None):
-    i = Imdb()
+    i = instance()
 
     arg = {"q": term}
     if extra:
         arg.update(extra)
-    return i.make_request('/find', arg)
+    result_list = i.make_request('/find', arg)['results']
+    results = {}
+    for r in result_list:
+        results[r['label']] = r['list']
+    return results
+
+def title_search(term, extra=None):
+    res = search(term, extra=extra)
+    for key in res.keys():
+        if 'Title' not in key:
+            del res[key]
+    return res
+        
+def name_search(term, extra=None):
+    """Search names only"""
+    res = search(term, extra=extra)
+    for key in res.keys():
+        if 'Name' not in key:
+            del res[key]
+    return res

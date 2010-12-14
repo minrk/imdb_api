@@ -16,6 +16,7 @@ from hashlib import sha1
 
 from .exceptions import ImdbRequestError, ImdbInvalidLocale
 
+_global_cache = {}
 
 class Imdb(object):
     # Hardcoded constants for the IMDb iPhone API - Do not change these!
@@ -35,6 +36,7 @@ class Imdb(object):
 
     def __init__(self):
         """Run a status check on initialization, to make sure everything is working"""
+        self._cache = _global_cache
         self.status_check()
 
     def set_locale(self, locale = None):
@@ -110,7 +112,7 @@ class Imdb(object):
         }
         js = self.make_request('/hello', arg)
         # Returned status should be 'ok', or there was an error
-        status = js["data"]["status"]
+        status = js["status"]
         if status != "ok":
             raise ImdbRequestError(
                 "Status check did not return 'ok', was %r" % (status))
@@ -122,6 +124,9 @@ class Imdb(object):
         function -- The function/address to query on the host
         arguments -- A dict with arguments to append the request
         """
+        key = function + json.dumps(arguments)
+        if key in self._cache:
+            return self._cache[key]
         # Build the URL and request it
         parameter = self.create_parameters(arguments)
         base_url = self.create_base_url(function, parameter)
@@ -132,7 +137,21 @@ class Imdb(object):
         opener = urllib2.build_opener()
         json_string = opener.open(request).read()
         # Make sure the JSON string can be decoded
-        data = json.loads(json_string, 'utf-8')
-        if data is False:
+        reply = json.loads(json_string, 'utf-8')
+        if reply is False:
             raise ImdbRequestError('Could not parse the JSON string')
-        return data
+        
+        # save in our cache:
+        self._cache[key] = reply['data']
+        return self._cache[key]
+    
+    def _format_reply(self, reply):
+        data = reply['data']
+
+_default_instance = None
+
+def instance():
+    global _default_instance
+    if _default_instance is None:
+        _default_instance = Imdb()
+    return _default_instance

@@ -10,6 +10,7 @@ import re
 from .base import Imdb
 from .search import search
 
+_SEARCH_PRIORITY = ['Popular Titles', 'Titles (Exact Matches)', "Titles (Partial Matches)"]
 
 class ImdbMovie(Imdb):
     def __init__(self, title, type=None):
@@ -34,14 +35,11 @@ class ImdbMovie(Imdb):
         extra = {}
         if type:
             extra = dict(type=type)
-        reply = search(title, extra=extra)
-        results = reply['data']['results']
-        for category in results:
-            if 'Titles' in category['label']:
-                for result in category['list']:
-                    print result
-                    if type is None or result['type'] == type:
-                        return result['tconst']
+        results = search(title, extra=extra)
+        for category in _SEARCH_PRIORITY:
+            for result in results.get(category, []):
+                if type is None or result['type'] == type:
+                    return result['tconst']
                     
         raise KeyError("Couldn't find show %r!"%title)
 
