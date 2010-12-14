@@ -30,7 +30,7 @@ class ImdbMovie(Imdb):
         super(ImdbMovie, self).__init__()
 
     def get_title_id_from_title(self, title, type=None):
-        """Get title's IMdB ID from a show's name.  This is a sketchy search."""
+        """Get title's IMDb ID from a show's name.  This is a sketchy search."""
         extra = {}
         if type:
             extra = dict(type=type)

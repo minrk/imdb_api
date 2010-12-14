@@ -32,7 +32,6 @@ class ImdbSeries(ImdbMovie):
         if self._seasons is None:
             reply = self.make_request('/title/episodes', arg)
             data = reply['data']
-            print data
             self._seasons = data['seasons']
             
         return self._seasons
