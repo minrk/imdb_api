@@ -8,19 +8,42 @@ Provides functions to interact with the movie/series features of the IMDb iPhone
 import re
 
 from .base import Imdb
+from .search import search
 
 
 class ImdbMovie(Imdb):
-    def __init__(self, url):
+    def __init__(self, title, type=None):
         """Set title ID constant and run the parent's init method.
 
         Keyword arguments:
-        url -- An IMdb URL
+        title -- A show's title or imdb id, or even full url
 
         """
-        self._title_id = self.get_title_id_from_url(url)
-        super(imdb_movie, self).__init__()
+        if re.match('^tt[0-9]{7}$', title):
+            # it's already an id
+            self._title_id = title
+        elif '://' in title:
+            # it's a url
+            self._title_id = self.get_title_id_from_url(title)
+        else:
+            self._title_id = self.get_title_id_from_title(title, type=type)
+        super(ImdbMovie, self).__init__()
 
+    def get_title_id_from_title(self, title, type=None):
+        """Get title's IMdB ID from a show's name.  This is a sketchy search."""
+        extra = {}
+        if type:
+            extra = dict(type=type)
+        reply = search(title, extra=extra)
+        results = reply['data']['results']
+        for category in results:
+            if 'Titles' in category['label']:
+                for result in category['list']:
+                    print result
+                    if type is None or result['type'] == type:
+                        return result['tconst']
+                    
+        raise KeyError("Couldn't find show %r!"%title)
 
     def get_title_id_from_url(self, url):
         """Get title's IMDb ID from the URL provided
@@ -116,9 +139,3 @@ class ImdbMovie(Imdb):
         }
         return self.make_request('/title/goofs', arg)
 
-    def get_episodes_by_season(self):
-        """Get an episode list sorted by season for the current series"""
-        arg = {
-            "tconst": self.get_title_id()
-        }
-        return self.make_request('/title/episodes', arg)
