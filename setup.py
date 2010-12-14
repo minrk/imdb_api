@@ -4,7 +4,7 @@ setup.py copied/edited from dbr's tvdb_api
 """
 from setuptools import setup
 setup(
-name = 'imdb',
+name = 'imdb_api',
 version='0.1',
 
 author=['dbr/Ben', 'MinRK'],
