@@ -29,7 +29,7 @@ Basic usage is:
  
 """,
 
-py_modules = ['imdb_api'],
+packages=['imdb_api'],
 
 classifiers=[
     "Intended Audience :: Developers",
