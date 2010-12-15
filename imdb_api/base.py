@@ -4,6 +4,7 @@
 Base class to interact with the IMDb iPhone API.
 """
 
+import os
 import re
 import time
 import json
@@ -15,8 +16,13 @@ from hmac import HMAC
 from hashlib import sha1
 
 from .exceptions import ImdbRequestError, ImdbInvalidLocale
+from .cache import Cache
 
-_global_cache = {}
+pjoin = os.path.join
+
+_global_cache = Cache(pjoin(os.path.expanduser('~'), '.imdb_cache.json'))
+
+cache_expiry = 7*24*60*60 # one week in seconds
 
 class Imdb(object):
     # Hardcoded constants for the IMDb iPhone API - Do not change these!
@@ -108,7 +114,7 @@ class Imdb(object):
             "count": "1",
             "device_model": "1",
             "system_name": "iPhone OS",
-            "system_version": "3.1.2"
+            "system_version": "4.2.1"
         }
         js = self.make_request('/hello', arg)
         # Returned status should be 'ok', or there was an error
@@ -126,7 +132,10 @@ class Imdb(object):
         """
         key = function + json.dumps(arguments)
         if key in self._cache:
-            return self._cache[key]
+            reply = self._cache[key]
+            fetchtime = reply.get('time', 0)
+            if time.time() - fetchtime < cache_expiry:
+                return reply
         # Build the URL and request it
         parameter = self.create_parameters(arguments)
         base_url = self.create_base_url(function, parameter)
@@ -142,6 +151,9 @@ class Imdb(object):
             raise ImdbRequestError('Could not parse the JSON string')
         
         # save in our cache:
+        if 'exp' in reply:
+            reply['data']['time'] = reply['exp']
+        reply['data']['time'] = reply['data'].get('time', time.time())
         self._cache[key] = reply['data']
         return self._cache[key]
     

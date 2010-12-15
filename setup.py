@@ -7,9 +7,9 @@ setup(
 name = 'imdb_api',
 version='0.1',
 
-author=['dbr/Ben', 'MinRK'],
+author=['dbr/Ben'],
 description='JSON Interface to imdb.com',
-url='http://github.com/minrk/IMDb-Python-API',
+url='http://github.com/dbr/IMDb-Python-API',
 license='BSD',
 
 long_description="""\
