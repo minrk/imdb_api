@@ -1,9 +1,12 @@
 """basic cache util"""
 
 import json
-import time
+import atexit
 from os import path
-from datetime import datetime
+
+pjoin = path.join
+
+cache_expiry = 7*24*60*60 # one week in seconds
 
 class Cache(dict):
     """Global Cache dict"""
@@ -13,6 +16,7 @@ class Cache(dict):
         self.filename = filename
         if filename is not None:
             self.init_cache_file()
+            atexit.register(self.save_cache_file)
     
     def init_cache_file(self):
         if path.isfile(self.filename):
@@ -25,7 +29,12 @@ class Cache(dict):
         with open(self.filename, 'w') as f:
             f.write(json.dumps(dict(self)))
     
-    def __del__(self):
-        if self.filename:
-            self.save_cache_file()
+    def __repr__(self):
+        return "< IMDB Cache %r>"%self.filename
+    
+    def __str__(self):
+        return repr(self)
+
+global_cache = Cache(pjoin(path.expanduser('~'), '.imdb_cache.json'))
+
         

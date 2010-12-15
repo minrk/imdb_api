@@ -4,7 +4,6 @@
 Base class to interact with the IMDb iPhone API.
 """
 
-import os
 import re
 import time
 import json
@@ -16,13 +15,7 @@ from hmac import HMAC
 from hashlib import sha1
 
 from .exceptions import ImdbRequestError, ImdbInvalidLocale
-from .cache import Cache
-
-pjoin = os.path.join
-
-_global_cache = Cache(pjoin(os.path.expanduser('~'), '.imdb_cache.json'))
-
-cache_expiry = 7*24*60*60 # one week in seconds
+from .cache import global_cache, expiry
 
 class Imdb(object):
     # Hardcoded constants for the IMDb iPhone API - Do not change these!
@@ -42,7 +35,7 @@ class Imdb(object):
 
     def __init__(self):
         """Run a status check on initialization, to make sure everything is working"""
-        self._cache = _global_cache
+        self._cache = global_cache
         self.status_check()
 
     def set_locale(self, locale = None):
@@ -134,7 +127,7 @@ class Imdb(object):
         if key in self._cache:
             reply = self._cache[key]
             fetchtime = reply.get('time', 0)
-            if time.time() - fetchtime < cache_expiry:
+            if time.time() - fetchtime < expiry:
                 return reply
         # Build the URL and request it
         parameter = self.create_parameters(arguments)
