@@ -18,7 +18,8 @@ class Cache(dict):
         if path.isfile(self.filename):
             with open(self.filename, 'r') as f:
                 jdata = f.read()
-            self.update(json.loads(jdata))
+            if jdata:
+                self.update(json.loads(jdata))
     
     def save_cache_file(self):
         with open(self.filename, 'w') as f:
