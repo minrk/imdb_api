@@ -6,7 +6,7 @@ from os import path
 
 pjoin = path.join
 
-cache_expiry = 7*24*60*60 # one week in seconds
+expiry = 7*24*60*60 # one week in seconds
 
 class Cache(dict):
     """Global Cache dict"""
